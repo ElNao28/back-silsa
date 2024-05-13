@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateSendEmailDto } from './dto/create-send-email.dto';
 const nodemailer = require("nodemailer");
-
+//esta variable seria como tu token
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -12,6 +12,7 @@ const transporter = nodemailer.createTransport({
 
 @Injectable()
 export class SendEmailService {
+  //esta es la funcion que se encarga de enviar el email a la empresa, cuando el usario manda su informacion mediante el formulario de contacto
   async sendEmailByContact(data: CreateSendEmailDto) {
     const info = await transporter.sendMail({
       from: '"Contacto Silsa Consultores" <silsaconsultores88@gmail.com>',
@@ -31,7 +32,7 @@ export class SendEmailService {
       status: HttpStatus.OK
     }
   }
-
+//Envia al correo el link para confirmar la sita
   async sendCodeConfirmation(to: string) {
     let code: string = "";
     for (var i = 0; i < 8; i++) {

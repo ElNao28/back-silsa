@@ -24,6 +24,7 @@ export class CitasService {
       }
     });
     if (dataCitas) {
+      console.log("La Primera")
       const newHorario = this.horariosRepository.create({
         hora: createCitaDto.hora,
         cita: dataCitas
@@ -34,6 +35,7 @@ export class CitasService {
         status: HttpStatus.OK
       }
     }
+    console.log("La Segunda")
     const newCita = this.citasRepository.create({
       dia: createCitaDto.dia,
       mes: createCitaDto.mes,
@@ -51,12 +53,13 @@ export class CitasService {
       status: HttpStatus.OK
     }
   }
+  //Esta funcion se encarga de retornar las citas
   getCitas() {
     return this.citasRepository.find({
       relations:['horarios']
     });
   }
-
+//Esta funcion se encarga de llamar a la funcion de "send-email" que genera y envia el codigo al correo, esta retorna el codigo y esta funcion de encarga de guardar el codigo en la base de datos
   async sendCodeConfirmation(data:AgendarDto){
     const code = await this.sendEmailService.sendCodeConfirmation(data.email);
     const newCode = this.codeRepository.create({code:code.toString()});
@@ -66,7 +69,7 @@ export class CitasService {
       status:HttpStatus.OK
     }
   }
-
+//Esta funcion se encarga de revisar que el codigo enviado desde el front sea correcto y este en la base de datos
   async confirmCode(code:string){
     const foundCode = await this.codeRepository.findOne({
       where:{
