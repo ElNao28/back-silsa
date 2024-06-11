@@ -5,4 +5,6 @@ export class Code{
     id:number;
     @Column({nullable:false})
     code:string;
+    @Column({nullable:false})
+    idHorario:number;
 }

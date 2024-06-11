@@ -1,32 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CitasService } from './citas.service';
-import { CreateCitaDto } from './dto/create-cita.dto';
-import { UpdateCitaDto } from './dto/update-cita.dto'
-import { AgendarDto } from './dto/agendar-cita.dto';
+import { CitaDisp } from './dto/citaDisp.dto';
+import { AgendaDto } from './dto/DataAgenda.dto';
 
 @Controller('citas')
 export class CitasController {
   constructor(private readonly citasService: CitasService) { }
 
-  @Post('')
-  async create(@Body() createCitaDto: CreateCitaDto) {
-    //console.log(createCitaDto)
-    return this.citasService.createCita(createCitaDto);
+  @Post('create-horario')
+  createCitaDisp(@Body()dataCitaDisp:CitaDisp){
+    return this.citasService.createCitasDisponibles(dataCitaDisp);
   }
-  @Get()
-  async getCitas() {
-    return this.citasService.getCitas();
-  }
-
   @Post('/send-code')
-  sendCodeConfirmation(@Body() data: AgendarDto) {
+  sendCodeConfirmation(@Body() data: AgendaDto) {
     console.log(data)
-    return this.citasService.sendCodeConfirmation(data)
+    return this.citasService.sendCodeConfirmation(data);
   }
 
   @Post('/confirm-code')
   confirmCodeCita(@Body()code:{code:string}) {
-    return this.citasService.confirmCode(code.code)
+    return this.citasService.confirmCode(code.code);
   }
 
+  @Get()
+  getHorariosByCitas(){
+    return this.citasService.getHorariosByCitas()
+  }
+  @Get('data-citas')
+  getDataCitas(){
+    return this.citasService.getDataCitas()
+  }
+  @Delete('delete-horario/:id')
+  deleteHorario(@Param('id')id:{idHorario:number}){
+    //console.log("Es: "+id)
+    return this.citasService.deleteHorario(id);
+  }
 }

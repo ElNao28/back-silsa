@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SendEmailModule } from './send-email/send-email.module';
 import { CitasModule } from './citas/citas.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true, 
     }),
     SendEmailModule, 
-    CitasModule],
+    CitasModule, UserModule],
   controllers: [],
   providers: [],
 })

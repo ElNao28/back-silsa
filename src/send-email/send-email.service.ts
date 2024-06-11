@@ -27,7 +27,7 @@ export class SendEmailService {
   </div>`
     });
     console.log("Message sent: %s", info.messageId);
-    return {
+    return { 
       message: 'Email enviado correctamente',
       status: HttpStatus.OK
     }
