@@ -9,9 +9,9 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: false,
   }
-
   app.enableCors(CorsOptions);
 
   await app.listen( process.env.PORT || 3000 );
 }
 bootstrap();
+ 

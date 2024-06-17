@@ -31,8 +31,7 @@ export class CitasController {
     return this.citasService.getDataCitas()
   }
   @Delete('delete-horario/:id')
-  deleteHorario(@Param('id')id:{idHorario:number}){
-    //console.log("Es: "+id)
-    return this.citasService.deleteHorario(id);
+  deleteHorario(@Param('id')id:string){
+    return this.citasService.deleteHorario(parseInt(id));
   }
 }

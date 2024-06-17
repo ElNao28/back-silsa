@@ -34,7 +34,6 @@ export class CitasService {
     .select(['horario.id', 'horario.hora', 'horario.status', 'dataCita', 'cita.dia','cita.mes','cita.anio'])
     //.select(['horario.id', 'horario.hora', 'horario.status'])
     .getMany();
-    console.log(horarios)
 
   const result = horarios.map(horario => ({
     id: horario.id,
@@ -66,7 +65,8 @@ export class CitasService {
     if (foundDay) {
       const foundHour = await this.horarioRepository.findOne({
         where:{
-          hora:dataCitasDisp.horarios
+          hora:dataCitasDisp.horarios,
+          cita:foundDay
         }
       });
       if(foundHour){
@@ -206,22 +206,20 @@ export class CitasService {
     }
   }
 
-  async deleteHorario(id:{idHorario:number}){
-    console.log(id)
+  async deleteHorario(id:number){
     const foundHorario = await this.horarioRepository.findOne({
       where:{
-        id:id.idHorario
+        id
       }
     });
-    //console.log(id.idHorario)
     if(!foundHorario) return{
       message:"No encontrado",
       status:HttpStatus.NOT_FOUND
     }
-    //this.horarioRepository.delete(id.idHorario)
+    this.horarioRepository.delete(id)
     return{
       message:"Exito",
       status:HttpStatus.OK
     }
   }
-}
+} 
