@@ -132,5 +132,19 @@ export class NoticiasService {
       status:HttpStatus.OK
     }
   }
+  async getTreeNoticie(){
+    const noticias = await this.noticiaRepository.find({
+      order:{
+        fecha:'DESC'
+      },
+      take:3
+    });
+    
+    return{
+      message:'Noticias encontradas',
+      status:HttpStatus.OK,
+      data:noticias
+    };
+  }
 
 }

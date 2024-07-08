@@ -1,6 +1,4 @@
 export class CitaDisp{
-    dia:number;
-    mes:number;
-    anio:number;
+    fecha:Date;
     horarios:string;
 }

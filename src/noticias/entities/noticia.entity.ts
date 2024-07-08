@@ -10,8 +10,8 @@ export class Noticia {
     contenido:string;
     @Column({type:'varchar',nullable:false})
     autor:string;
-    @Column({type:'varchar',nullable:false})
-    fecha:string;
+    @Column({type:'date'})
+    fecha:Date;
     @Column({type:'varchar',nullable:false})
     img:string;
     @Column({type:'varchar',nullable:false,default:"activo"})

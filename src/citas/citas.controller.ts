@@ -9,6 +9,7 @@ export class CitasController {
 
   @Post('create-horario')
   createCitaDisp(@Body()dataCitaDisp:CitaDisp){
+    console.log(dataCitaDisp)
     return this.citasService.createCitasDisponibles(dataCitaDisp);
   }
   @Post('/send-code')
@@ -23,8 +24,8 @@ export class CitasController {
   }
 
   @Get()
-  getHorariosByCitas(){
-    return this.citasService.getHorariosByCitas()
+  async getHorariosByCitas(){
+    return await this.citasService.getHorariosByCitas()
   }
   @Get('data-citas')
   getDataCitas(){

@@ -11,6 +11,10 @@ export class NoticiasController {
   findAll() {
     return this.noticiasService.getNoticiasForAdmin();
   }
+  @Get('tree')
+  findAl() {
+    return this.noticiasService.getTreeNoticie();
+  }
   @Get('all')
   getNoticiasForUser() {
     return this.noticiasService.getNoticiasForUser();

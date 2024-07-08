@@ -3,6 +3,7 @@ import { SendEmailModule } from './send-email/send-email.module';
 import { CitasModule } from './citas/citas.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NoticiasModule } from './noticias/noticias.module';
+import { AcountsModule } from './acounts/acounts.module';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { NoticiasModule } from './noticias/noticias.module';
       synchronize: true, 
     }),
     SendEmailModule, 
-    CitasModule, NoticiasModule], 
+    CitasModule, NoticiasModule, AcountsModule], 
   controllers: [],
   providers: [],
 })

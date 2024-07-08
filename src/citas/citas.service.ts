@@ -20,59 +20,58 @@ export class CitasService {
     private readonly sendEmailService: SendEmailService,
   ) { }
 
-  async getHorariosByCitas(){
-    return this.citasRepository.createQueryBuilder('citas')
-    .innerJoinAndSelect('citas.horarios','horas')
-    .where('horas.status = :status',{status:'activo'})
-    .getMany()
+
+  async getHorariosByCitas():Promise<Cita[]> {
+    const hoy = new Date();
+    await this.checkCitasByDate(hoy)
+      return this.citasRepository.createQueryBuilder('citas')
+      .innerJoinAndSelect('citas.horarios', 'horas')
+      .where('horas.status = :status AND citas.status = :status', { status: 'activo' })
+      .getMany()
   }
-  async getDataCitas(){
+  async getDataCitas() {
     const horarios = await this.horarioRepository.createQueryBuilder('horario')
-    .innerJoinAndSelect('horario.cita', 'cita')
-    .innerJoinAndSelect('horario.dataCita', 'dataCita')
-    .where('horario.status IN (:...statuses)', { statuses: ['pendiente', 'atendido'] })
-    .select(['horario.id', 'horario.hora', 'horario.status', 'dataCita', 'cita.dia','cita.mes','cita.anio'])
-    //.select(['horario.id', 'horario.hora', 'horario.status'])
-    .getMany();
+      .innerJoinAndSelect('horario.cita', 'cita')
+      .innerJoinAndSelect('horario.dataCita', 'dataCita')
+      .where('horario.status IN (:...statuses)', { statuses: ['pendiente', 'atendido'] })
+      .select(['horario.id', 'horario.hora', 'horario.status', 'dataCita', 'cita.fecha'])
+      .getMany();
 
-  const result = horarios.map(horario => ({
-    id: horario.id,
-    hora: horario.hora,
-    fecha: horario.cita.dia+"/"+horario.cita.mes+"/"+horario.cita.anio,
-    status: horario.status,
-    dataCita: {
-      id: horario.dataCita.id,
-      name: horario.dataCita.name,
-      lastname: horario.dataCita.lastname,
-      motherlastname: horario.dataCita.motherlastname,
-      email: horario.dataCita.email,
-      cellphone: horario.dataCita.cellphone,
-      asunto: horario.dataCita.asunto,
-      status: horario.dataCita.status
-    },
-  }));
-
-  return { horarios: result };
+    const result = horarios.map(horario => ({
+      id: horario.id,
+      hora: horario.hora,
+      fecha: horario.cita.fecha,
+      status: horario.status,
+      dataCita: {
+        id: horario.dataCita.id,
+        name: horario.dataCita.name,
+        lastname: horario.dataCita.lastname,
+        motherlastname: horario.dataCita.motherlastname,
+        email: horario.dataCita.email,
+        cellphone: horario.dataCita.cellphone,
+        asunto: horario.dataCita.asunto,
+        status: horario.dataCita.status
+      },
+    }));
+    return { horarios: result };
   }
   async createCitasDisponibles(dataCitasDisp: CitaDisp) {
     const foundDay = await this.citasRepository.findOne({
       where: {
-        dia: dataCitasDisp.dia,
-        mes: dataCitasDisp.mes,
-        anio: dataCitasDisp.anio
+        fecha: dataCitasDisp.fecha
       }
     });
     if (foundDay) {
       const foundHour = await this.horarioRepository.findOne({
-        where:{
-          hora:dataCitasDisp.horarios,
-          cita:foundDay
+        where: {
+          hora: dataCitasDisp.horarios,
+          cita: foundDay
         }
       });
-      if(foundHour){
-        return{
-          message:"Hora ya registrada",
-          status:HttpStatus.CONFLICT
+      if (foundHour) {
+        return {
+          message: "Hora ya registrada",
+          status: HttpStatus.CONFLICT
         }
       }
       const newHorario = this.horarioRepository.create({
@@ -83,9 +82,7 @@ export class CitasService {
     }
     else {
       const dayCita = this.citasRepository.create({
-        dia: dataCitasDisp.dia,
-        mes: dataCitasDisp.mes,
-        anio: dataCitasDisp.anio
+        fecha: dataCitasDisp.fecha
       });
       const saveCita = await this.citasRepository.save(dayCita);
       const foundCita = await this.citasRepository.findOne({
@@ -206,20 +203,34 @@ export class CitasService {
     }
   }
 
-  async deleteHorario(id:number){
+  async deleteHorario(id: number) {
     const foundHorario = await this.horarioRepository.findOne({
-      where:{
+      where: {
         id
       }
     });
-    if(!foundHorario) return{
-      message:"No encontrado",
-      status:HttpStatus.NOT_FOUND
+    if (!foundHorario) return {
+      message: "No encontrado",
+      status: HttpStatus.NOT_FOUND
     }
     this.horarioRepository.delete(id)
-    return{
-      message:"Exito",
-      status:HttpStatus.OK
+    return {
+      message: "Exito",
+      status: HttpStatus.OK
     }
   }
+
+  async checkCitasByDate(date: Date) {
+
+    const foundCitas = await this.citasRepository.find()
+    for (let i = 0; i < foundCitas.length; i++) {
+      const newP:Date = new Date(foundCitas[i].fecha)
+      if (newP< date) {
+        await this.citasRepository.update(foundCitas[i].id,{
+          status:'inactivo'
+        });
+      }
+    }
+  }
+
 } 

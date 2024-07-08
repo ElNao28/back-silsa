@@ -4,12 +4,8 @@ import { Horario } from "./horario.entity";
 export class Cita {
     @PrimaryGeneratedColumn()
     id:number;
-    @Column({type:"int",nullable:false})
-    dia:number;
-    @Column({type:"int",nullable:false})
-    mes:number;
-    @Column({type:"int",nullable:false})
-    anio:number;
+    @Column({type:"date",nullable:false})
+    fecha:Date;
     @Column({type:"varchar",nullable:false,default:"activo"})
     status:string;
     
