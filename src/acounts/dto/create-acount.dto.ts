@@ -7,3 +7,4 @@ export class CreateAcountDto {
     telefono: string;
     genero: string;
 }
+ 

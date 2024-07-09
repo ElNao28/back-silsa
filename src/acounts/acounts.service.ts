@@ -9,6 +9,17 @@ import { Login } from './interfaces/login.interface';
 @Injectable()
 export class AcountsService {
   constructor(@InjectRepository(Acount)private acountRepository:Repository<Acount>){}
+  async createAdmin(dataAdmin:CreateAcountDto){
+    const newAdmin = await this.acountRepository.create({
+      foto:'img.png',
+      ...dataAdmin
+    });
+    this.acountRepository.save(newAdmin);
+    return{
+      message:'exito',
+      status:HttpStatus.OK
+    }
+  }
   async loginAdmin(data:Login){
     const foundAdmin = await this.acountRepository.findOne({
       where:{
@@ -44,6 +55,32 @@ export class AcountsService {
         name:data,
         rol:foundAcount.rol
       }
+    }
+  }
+  async getFDataProfile(id:number){
+    const foundData = await this.acountRepository.findOne({
+      where:{
+        id
+      }
+    });
+    if(!foundData) return{
+      message: "No data found",
+      status:HttpStatus.NOT_FOUND
+    }
+
+    const data = {
+      nombre:foundData.nombre,
+      apellido:foundData.apellido,
+      apellidoM:foundData.apellidoM,
+      telefono:foundData.telefono,
+      email:foundData.email,
+      genero:foundData.genero,
+      foto:foundData.foto
+    }
+    return {
+      message:"exito",
+      status:HttpStatus.OK,
+      data: data
     }
   }
 }

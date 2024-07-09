@@ -22,4 +22,6 @@ export class Acount {
     foto?: string;
     @Column({ type: 'varchar', nullable: false,default:'admin' })
     rol: string;
+    @Column({ type: 'varchar', nullable: false,default:'activo' })
+    status: string;
 }
