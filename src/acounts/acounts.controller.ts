@@ -8,6 +8,10 @@ import { Login } from './interfaces/login.interface';
 export class AcountsController {
   constructor(private readonly acountsService: AcountsService) {}
 
+  @Get('get-admins')
+  getAdmins(){
+    return this.acountsService.getAdmins();
+  }
 
   @Post('create-admin')
   createAdmin(@Body()dataAdmin:CreateAcountDto){
@@ -24,5 +28,17 @@ export class AcountsController {
   @Post('get-data')
   getDataByAdmin(@Body()data:{id:string}){
     return this.acountsService.getFDataProfile(parseInt(data.id));
+  }
+  @Delete('delete-admin/:id')
+  deleteAdmin(@Param('id')id:string){
+    return this.acountsService.deleteAdmin(parseInt(id))
+  }
+  @Post('desactivate-admin')
+  desactivateAdmin(@Body()data:{id:string}){
+    return this.acountsService.desactivateAdmin(parseInt(data.id))
+  }
+  @Post('activate-admin')
+  activateAdmin(@Body()data:{id:string}){
+    return this.acountsService.activateAdmin(parseInt(data.id))
   }
 }

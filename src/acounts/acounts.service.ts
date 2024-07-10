@@ -83,4 +83,70 @@ export class AcountsService {
       data: data
     }
   }
+  async getAdmins(){
+    const foundAdmins = await this.acountRepository.find({
+      where:{
+        rol:'admin'
+      }
+    });
+
+    return{
+      message:"found admins",
+      status:HttpStatus.OK,
+      data:foundAdmins
+    }
+  }
+  async deleteAdmin(id:number){
+    console.log(id)
+    const foundAdmin = await this.acountRepository.findOne({
+      where:{
+        id
+      }
+    });
+    if(!foundAdmin) return{
+      message:"admin not found",
+      status:HttpStatus.NOT_FOUND
+    }
+    this.acountRepository.delete(foundAdmin.id);
+    return{
+      message:"admin deleted",
+      status:HttpStatus.OK
+    }
+  }
+  async desactivateAdmin(id:number){
+    const foundAdmin = await  this.acountRepository.findOne({
+      where:{
+        id
+      }
+    });
+    if(!foundAdmin) return{
+      message:"admin not found",
+      status:HttpStatus.NOT_FOUND
+    }
+    this.acountRepository.update(foundAdmin.id,{
+      status:'inactivo'
+    });
+    return{
+      message:"admin desactivate",
+      status:HttpStatus.OK
+    }
+  }
+  async activateAdmin(id:number){
+    const foundAdmin = await this.acountRepository.findOne({
+      where:{
+        id
+      }
+    });
+    if(!foundAdmin) return{
+      message:"admin not found",
+      status:HttpStatus.NOT_FOUND
+    }
+    this.acountRepository.update(foundAdmin.id,{
+      status:'activo'
+    });
+    return{
+      message:"admin activado",
+      status:HttpStatus.OK
+    }
+  }
 }
