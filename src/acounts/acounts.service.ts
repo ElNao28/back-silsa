@@ -19,6 +19,15 @@ export class AcountsService {
     @InjectRepository(Acount) private acountRepository: Repository<Acount>
   ) { }
   async createAdmin(dataAdmin: CreateAcountDto, imagen: Express.Multer.File) {
+    const foundAdmin = await this.acountRepository.findOne({
+      where: {
+        email: dataAdmin.email
+      }
+    });
+    if(foundAdmin) return {
+      message: 'El correo ya está registrado',
+      status: HttpStatus.CONFLICT
+    }
     const newPromise = new Promise<{secure_url}>((resolve, reject)=>{
       const uploadImg = cloudinary.v2.uploader.upload_stream((err, result) => {
         if (err) return reject(err);
