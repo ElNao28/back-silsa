@@ -9,6 +9,7 @@ import * as cloudinary from 'cloudinary';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import { Acount } from 'src/acounts/entities/acount.entity';
 
 cloudinary.v2.config({
   cloud_name: 'dh18jn2uy',
@@ -19,7 +20,10 @@ cloudinary.v2.config({
 @Injectable()
 export class NoticiasService {
 
-  constructor(@InjectRepository(Noticia) private noticiaRepository: Repository<Noticia>) { }
+  constructor(
+    @InjectRepository(Noticia) private noticiaRepository: Repository<Noticia>,
+    @InjectRepository(Acount) private acountRepository: Repository<Acount>
+  ) { }
 
   async createNoticia(createNoticiaDto: CreateNoticiaDto, file: { imagen?: Express.Multer.File[] }) {
     let imagen:string = "";
@@ -34,11 +38,14 @@ export class NoticiasService {
       imagen = result.secure_url;
       fs.unlinkSync(filePath);
     }
-
+    const foundAdmin = await this.acountRepository.findOneBy({id:+createNoticiaDto.autor});
+    const nameAdmin = `${foundAdmin.nombre} ${foundAdmin.apellido} ${foundAdmin.apellidoM}`;
+    const {autor,img,...data} = createNoticiaDto;
     const newNoticia = this.noticiaRepository.create({
       status:'activo',
       img: imagen,
-      ...createNoticiaDto
+      autor:nameAdmin,
+      ...data
     });
     this.noticiaRepository.save(newNoticia);
     return {
@@ -47,7 +54,13 @@ export class NoticiasService {
     }
   }
   async getNoticiasForAdmin() {
-    const noticias = await this.noticiaRepository.find();
+    const noticias = await this.noticiaRepository.find(
+      {
+        order: {
+          id: 'DESC'
+        },
+      }
+    );
     return {
       message: 'Noticias encontradas',
       status: HttpStatus.OK,
@@ -58,7 +71,10 @@ export class NoticiasService {
     const noticias = await this.noticiaRepository.find({
       where: {
         status: 'activo'
-      }
+      },
+      order: {
+        id: 'DESC'
+      },
     });
     return {
       message: 'Noticias encontradas',
@@ -163,7 +179,7 @@ export class NoticiasService {
   async getTreeNoticie() {
     const noticias = await this.noticiaRepository.find({
       order: {
-        fecha: 'DESC'
+        id: 'DESC'
       },
       take: 3
     });
