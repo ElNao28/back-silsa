@@ -14,7 +14,6 @@ export class CitasController {
   }
   @Post('/send-code')
   sendCodeConfirmation(@Body() data: AgendaDto) {
-    console.log(data)
     return this.citasService.sendCodeConfirmation(data);
   }
 

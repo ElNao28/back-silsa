@@ -26,6 +26,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
     "@types/multer": "^1.4.11",
+    "buffer-to-stream": "^1.0.0",
     "cloudinary": "^2.2.0",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.9.7",

@@ -44,6 +44,7 @@ export class SendEmailService {
       subject: "Confirmacion de cita",
       html: `<div style="padding: 10px; font-size: large;">
       <h2>Entra al siguiente enlace para confirmar tu cita:</h2>
+      <p>Este enlace expirara en 3 minutos despues de a ver sido entregado</p>
       <a href="http://localhost:4200/confirmar-cita/${code}">Click aqui para confirmar tu cita</a>
       </div>`
     });

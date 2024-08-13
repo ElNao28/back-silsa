@@ -21,16 +21,9 @@ export class NoticiasService {
 
   constructor(@InjectRepository(Noticia) private noticiaRepository: Repository<Noticia>) { }
 
-
-
-
-
-
-
   async createNoticia(createNoticiaDto: CreateNoticiaDto, file: { imagen?: Express.Multer.File[] }) {
     let imagen:string = "";
     for (let i = 0; i < file.imagen.length; i++) {
-      console.log(file.imagen[i].originalname)
       const filePath = path.join(os.tmpdir(), file.imagen[i].originalname);
       fs.writeFileSync(filePath, file.imagen[i].buffer);
       
@@ -53,17 +46,6 @@ export class NoticiasService {
       status: HttpStatus.OK
     }
   }
-
-
-
-
-
-
-
-
-
-
-
   async getNoticiasForAdmin() {
     const noticias = await this.noticiaRepository.find();
     return {
@@ -152,6 +134,8 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
+    const idImg = foundNoticia.img.split('/')[8].split('.')[0]
+    cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
     this.noticiaRepository.delete(foundNoticia);
     return {
       message: 'Noticia eliminada',

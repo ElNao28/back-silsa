@@ -1,44 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { AcountsService } from './acounts.service';
 import { CreateAcountDto } from './dto/create-acount.dto';
-import { UpdateAcountDto } from './dto/update-acount.dto';
 import { Login } from './interfaces/login.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('acounts')
 export class AcountsController {
-  constructor(private readonly acountsService: AcountsService) {}
+  constructor(private readonly acountsService: AcountsService) { }
 
   @Get('get-admins')
-  getAdmins(){
+  getAdmins() {
     return this.acountsService.getAdmins();
   }
 
   @Post('create-admin')
-  createAdmin(@Body()dataAdmin:CreateAcountDto){
-    return this.acountsService.createAdmin(dataAdmin);
+  @UseInterceptors(FileInterceptor('imagen'))
+  createAdmin(@Body() dataAdmin: CreateAcountDto, @UploadedFile() file: Express.Multer.File) {
+    return this.acountsService.createAdmin(dataAdmin,file);
   }
   @Post('login')
-  loginAdmin(@Body()data:Login){
+  loginAdmin(@Body() data: Login) {
     return this.acountsService.loginAdmin(data);
   }
   @Post('rol')
-  checkRol(@Body()data:{id:string}){
+  checkRol(@Body() data: { id: string }) {
     return this.acountsService.checkRol(parseInt(data.id));
   }
   @Post('get-data')
-  getDataByAdmin(@Body()data:{id:string}){
+  getDataByAdmin(@Body() data: { id: string }) {
     return this.acountsService.getFDataProfile(parseInt(data.id));
   }
   @Delete('delete-admin/:id')
-  deleteAdmin(@Param('id')id:string){
+  deleteAdmin(@Param('id') id: string) {
     return this.acountsService.deleteAdmin(parseInt(id))
   }
   @Post('desactivate-admin')
-  desactivateAdmin(@Body()data:{id:string}){
+  desactivateAdmin(@Body() data: { id: string }) {
     return this.acountsService.desactivateAdmin(parseInt(data.id))
   }
   @Post('activate-admin')
-  activateAdmin(@Body()data:{id:string}){
+  activateAdmin(@Body() data: { id: string }) {
     return this.acountsService.activateAdmin(parseInt(data.id))
   }
 }

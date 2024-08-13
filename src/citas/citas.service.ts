@@ -138,7 +138,7 @@ export class CitasService {
     setTimeout(() => {
       this.deleteCodeAndCita(newAgenda.id);
       console.log("eliminado")
-    }, 60000)
+    }, 180000)
     return {
       message: "Exito",
       status: HttpStatus.OK
@@ -151,7 +151,7 @@ export class CitasService {
       },
       relations: ['code']
     });
-
+    if(!foundDataCita) return
     if (foundDataCita && foundDataCita.status === "Pconfirm") {
       this.horarioRepository.update(foundDataCita.code.idHorario, {
         dataCita: null
