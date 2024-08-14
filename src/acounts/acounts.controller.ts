@@ -42,4 +42,9 @@ export class AcountsController {
   activateAdmin(@Body() data: { id: string }) {
     return this.acountsService.activateAdmin(parseInt(data.id))
   }
+  @Patch('update-photo/:id')
+  @UseInterceptors(FileInterceptor('imagen'))
+  updatePhothoAdmin(@Param('id') id: string, @UploadedFile() img: Express.Multer.File) {
+    return this.acountsService.updatePhothoAdmin(parseInt(id), img);
+  }
 }

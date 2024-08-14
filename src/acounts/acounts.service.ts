@@ -24,19 +24,19 @@ export class AcountsService {
         email: dataAdmin.email
       }
     });
-    if(foundAdmin) return {
+    if (foundAdmin) return {
       message: 'El correo ya está registrado',
       status: HttpStatus.CONFLICT
     }
-    const newPromise = new Promise<{secure_url}>((resolve, reject)=>{
+    const newPromise = new Promise<{ secure_url }>((resolve, reject) => {
       const uploadImg = cloudinary.v2.uploader.upload_stream((err, result) => {
         if (err) return reject(err);
-          resolve(result);
+        resolve(result);
       });
       toStream(imagen.buffer).pipe(uploadImg);
     });
     const newAdmin = await this.acountRepository.create({
-      foto:(await newPromise).secure_url,
+      foto: (await newPromise).secure_url,
       ...dataAdmin
     });
     this.acountRepository.save(newAdmin);
@@ -84,7 +84,7 @@ export class AcountsService {
       data: {
         name: data,
         rol: foundAcount.rol,
-        img:foundAcount.foto
+        img: foundAcount.foto
       }
     }
   }
@@ -128,7 +128,7 @@ export class AcountsService {
     }
   }
   async deleteAdmin(id: number) {
-    
+
     const foundAdmin = await this.acountRepository.findOne({
       where: {
         id
@@ -139,7 +139,7 @@ export class AcountsService {
       status: HttpStatus.NOT_FOUND
     }
     const idImg = foundAdmin.foto.split('/')[7].split('.')[0]
-    cloudinary.v2.api.delete_resources([idImg],{type:'upload',resource_type:'image'}).then();
+    cloudinary.v2.api.delete_resources([idImg], { type: 'upload', resource_type: 'image' }).then();
     this.acountRepository.delete(foundAdmin.id);
     return {
       message: "admin deleted",
@@ -181,5 +181,29 @@ export class AcountsService {
       message: "admin activado",
       status: HttpStatus.OK
     }
+  }
+  async updatePhothoAdmin(id: number, img: Express.Multer.File) {
+    const foundAdmin = await this.acountRepository.findOne({
+      where: {
+        id
+      }
+    });
+    if (!foundAdmin) return {
+      message: "admin not found",
+      status: HttpStatus.NOT_FOUND
+    }
+    const idImg = foundAdmin.foto.split('/')[7].split('.')[0]
+    cloudinary.v2.api.delete_resources([idImg], { type: 'upload', resource_type: 'image' }).then();
+    const newPromise = new Promise<{ secure_url }>((resolve, reject) => {
+      const uploadImg = cloudinary.v2.uploader.upload_stream((err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+      toStream(img.buffer).pipe(uploadImg);
+    });
+    const newFoto = await newPromise;
+    this.acountRepository.update(foundAdmin.id, {
+      foto: newFoto.secure_url
+    })
   }
 }

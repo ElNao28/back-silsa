@@ -14,6 +14,8 @@ export class Noticia {
     fecha:Date;
     @Column({type:'varchar',nullable:false})
     img:string;
+    @Column({type:'varchar',nullable:false})
+    video:string;
     @Column({type:'varchar',nullable:false,default:"activo"})
     status:string;
 }

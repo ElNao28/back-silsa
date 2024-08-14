@@ -4,4 +4,5 @@ export class CreateNoticiaDto {
     autor:string;
     fecha:string;
     img:string;
+    video:string
 }
