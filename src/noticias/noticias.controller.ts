@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile } from '@nestjs/common';
 import { NoticiasService } from './noticias.service';
 import { CreateNoticiaDto } from './dto/create-noticia.dto';
 import { UpdateNoticiaDto } from './dto/update-noticia.dto';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('noticias')
 export class NoticiasController {
@@ -46,5 +46,10 @@ export class NoticiasController {
   @Patch('update-noticia/:id')
   updateNoticia(@Param('id')idNoticia:string,@Body()dataNoticia:UpdateNoticiaDto){
     return this.noticiasService.updateNoticia(parseInt(idNoticia),dataNoticia);
+  }
+  @Patch('update-img/:id')
+  @UseInterceptors(FileInterceptor('imagen'))
+  editImgNoticia(@Param('id')id:number,@UploadedFile() imagen: Express.Multer.File) {
+    return this.noticiasService.editImgNoticia(id,imagen);
   }
 }
