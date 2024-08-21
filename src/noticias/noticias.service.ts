@@ -179,6 +179,9 @@ export class NoticiasService {
   }
   async getTreeNoticie() {
     const noticias = await this.noticiaRepository.find({
+      where:{
+        status:'activo'
+      },
       order: {
         id: 'DESC'
       },
