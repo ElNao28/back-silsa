@@ -163,17 +163,25 @@ export class NoticiasService {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
         id: idNoticia
-      }
+      },
+      relations:['dataNoticias']
     });
+    console.log(foundNoticia)
     if (!foundNoticia) {
-      return {
+      return { 
         message: 'Noticia no encontrada',
         status: HttpStatus.NOT_FOUND
       }
     }
-    //const idImg = foundNoticia.img.split('/')[8].split('.')[0]
-    //cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
-    this.dataNoticiaRepository.delete({noticia:foundNoticia})
+    if(foundNoticia.dataNoticias){
+      const images = foundNoticia.dataNoticias.filter(data => data.type === 'image')
+      for(let i = 0; i < images.length;i++){
+        const idImg = images[i].content.split('/')[8].split('.')[0]
+        console.log(idImg)
+        cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
+      }
+    }
+    await this.dataNoticiaRepository.delete({noticia:foundNoticia})
     this.noticiaRepository.delete(foundNoticia.id)
     return {
       message: 'Noticia eliminada',
