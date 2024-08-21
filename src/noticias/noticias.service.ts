@@ -28,11 +28,13 @@ export class NoticiasService {
     @InjectRepository(DataNoticia) private dataNoticiaRepository:Repository<DataNoticia>
   ) { }
 
-  async createNewNotice(dataNotice:{position:number,type:string,content:string}[],files:Array<Express.Multer.File>){
+  async createNewNotice(dataNotice:{position:number,type:string,content:string}[],files:Array<Express.Multer.File>,fecha:string, idAutor:string){
+
+    const foundAdmin = await this.acountRepository.findOneBy({id:+idAutor})
     const newNotice = this.noticiaRepository.create({
       status:'activo',
-      autor:'pablito',
-      fecha:'2024-10-06'
+      autor:`${foundAdmin.nombre} ${foundAdmin.apellido} ${foundAdmin.apellidoM}`,
+      fecha:fecha
     });
     const saveNewNotice = await this.noticiaRepository.save(newNotice)
     for (let i = 0; i < dataNotice.length; i++) {
@@ -70,6 +72,19 @@ export class NoticiasService {
       message:'Exito',
       status:HttpStatus.OK
     }
+  }
+
+  async getAllNoticies(){
+    const foundNotices = await this.noticiaRepository.find({
+      where:{
+        status:'activo'
+      },
+      relations:['dataNoticias']
+    })
+    for(let i = 0; i < foundNotices.length;i++){
+      foundNotices[i].dataNoticias.sort((a,b)=>a.position- b.position)
+    }
+    return foundNotices
   }
   // async createNoticia(createNoticiaDto: CreateNoticiaDto, file: { imagen?: Express.Multer.File[] }) {
   //   let imagen:string = "";

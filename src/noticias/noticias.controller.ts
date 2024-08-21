@@ -8,6 +8,11 @@ import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestj
 export class NoticiasController {
   constructor(private readonly noticiasService: NoticiasService) {}
 
+  @Get('all-noticias')
+  getAllNoticias(){
+    console.log('aqui')
+    return this.noticiasService.getAllNoticies();
+  }
   @Get()
   findAll() {
     return this.noticiasService.getNoticiasForAdmin();
@@ -36,10 +41,12 @@ export class NoticiasController {
     FilesInterceptor('images')
   )
   createNoticiaTest(@Body() data, @UploadedFiles()files:Array<Express.Multer.File>) {
+    console.log(data)
     let dataNotice:{position:number,type:string, content:string}[] = JSON.parse(data.data);
-    return this.noticiasService.createNewNotice(dataNotice,files)
-    //return this.noticiasService.createNoticia(createNoticiaDto,files);
+    return this.noticiasService.createNewNotice(dataNotice,files,data.fecha,data.autor)
   }
+
+  
   @Post('desactivate/:id')
   desactivateNoticia(@Param('id')idNoticia:string){
     return this.noticiasService.desactivateNoticia(parseInt(idNoticia));
