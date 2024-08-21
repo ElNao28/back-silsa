@@ -8,11 +8,6 @@ import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestj
 export class NoticiasController {
   constructor(private readonly noticiasService: NoticiasService) {}
 
-  @Get('all-noticias')
-  getAllNoticias(){
-    console.log('aqui')
-    return this.noticiasService.getAllNoticies();
-  }
   @Get()
   findAll() {
     return this.noticiasService.getNoticiasForAdmin();
@@ -29,19 +24,11 @@ export class NoticiasController {
   findOne(@Param('id') id: string) {
     return this.noticiasService.getNoticiaById(parseInt(id));
   }
-  @UseInterceptors(
-    FileFieldsInterceptor([{name:'imagen',maxCount:4}])
-  )
-  @Post('create-noticia')
-  createNoticia(@Body() createNoticiaDto: CreateNoticiaDto,@UploadedFiles() files: { imagen?: Express.Multer.File[]}) {
-    //return this.noticiasService.createNoticia(createNoticiaDto,files);
-  }
   @Post('create-noticia-test')
   @UseInterceptors(
     FilesInterceptor('images')
   )
   createNoticiaTest(@Body() data, @UploadedFiles()files:Array<Express.Multer.File>) {
-    console.log(data)
     let dataNotice:{position:number,type:string, content:string}[] = JSON.parse(data.data);
     return this.noticiasService.createNewNotice(dataNotice,files,data.fecha,data.autor)
   }
@@ -57,7 +44,7 @@ export class NoticiasController {
   }
   @Delete('delete/:id')
   deleteNoticia(@Param('id')idNoticia:string){
-    //return this.noticiasService.deleteNoticia(parseInt(idNoticia));
+    return this.noticiasService.deleteNoticia(parseInt(idNoticia));
   }
   @Patch('update-noticia/:id')
   updateNoticia(@Param('id')idNoticia:string,@Body()dataNoticia:UpdateNoticiaDto){

@@ -73,53 +73,13 @@ export class NoticiasService {
       status:HttpStatus.OK
     }
   }
-
-  async getAllNoticies(){
-    const foundNotices = await this.noticiaRepository.find({
-      where:{
-        status:'activo'
-      },
-      relations:['dataNoticias']
-    })
-    for(let i = 0; i < foundNotices.length;i++){
-      foundNotices[i].dataNoticias.sort((a,b)=>a.position- b.position)
-    }
-    return foundNotices
-  }
-  // async createNoticia(createNoticiaDto: CreateNoticiaDto, file: { imagen?: Express.Multer.File[] }) {
-  //   let imagen:string = "";
-  //   for (let i = 0; i < file.imagen.length; i++) {
-  //     const filePath = path.join(os.tmpdir(), file.imagen[i].originalname);
-  //     fs.writeFileSync(filePath, file.imagen[i].buffer);
-      
-  //     const result = await cloudinary.v2.uploader.upload(filePath, {
-  //       folder: 'noticias',
-  //       resource_type: 'image'
-  //     });
-  //     imagen = result.secure_url;
-  //     fs.unlinkSync(filePath);
-  //   }
-  //   const foundAdmin = await this.acountRepository.findOneBy({id:+createNoticiaDto.autor});
-  //   const nameAdmin = `${foundAdmin.nombre} ${foundAdmin.apellido} ${foundAdmin.apellidoM}`;
-  //   const {autor,img,...data} = createNoticiaDto;
-  //   const newNoticia = this.noticiaRepository.create({
-  //     status:'activo',
-  //     img: imagen,
-  //     autor:nameAdmin,
-  //     ...data
-  //   });
-  //   this.noticiaRepository.save(newNoticia);
-  //   return {
-  //     message: 'Noticia creada',
-  //     status: HttpStatus.OK
-  //   }
-  // }
   async getNoticiasForAdmin() {
     const noticias = await this.noticiaRepository.find(
       {
         order: {
           id: 'DESC'
         },
+        relations:['dataNoticias']
       }
     );
     return {
@@ -199,26 +159,27 @@ export class NoticiasService {
       status: HttpStatus.OK
     }
   }
-  // async deleteNoticia(idNoticia: number) {
-  //   const foundNoticia = await this.noticiaRepository.findOne({
-  //     where: {
-  //       id: idNoticia
-  //     }
-  //   });
-  //   if (!foundNoticia) {
-  //     return {
-  //       message: 'Noticia no encontrada',
-  //       status: HttpStatus.NOT_FOUND
-  //     }
-  //   }
-  //   const idImg = foundNoticia.img.split('/')[8].split('.')[0]
-  //   cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
-  //   this.noticiaRepository.delete(foundNoticia);
-  //   return {
-  //     message: 'Noticia eliminada',
-  //     status: HttpStatus.OK
-  //   }
-  // }
+  async deleteNoticia(idNoticia: number) {
+    const foundNoticia = await this.noticiaRepository.findOne({
+      where: {
+        id: idNoticia
+      }
+    });
+    if (!foundNoticia) {
+      return {
+        message: 'Noticia no encontrada',
+        status: HttpStatus.NOT_FOUND
+      }
+    }
+    //const idImg = foundNoticia.img.split('/')[8].split('.')[0]
+    //cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
+    this.dataNoticiaRepository.delete({noticia:foundNoticia})
+    this.noticiaRepository.delete(foundNoticia.id)
+    return {
+      message: 'Noticia eliminada',
+      status: HttpStatus.OK
+    }
+  }
   async updateNoticia(idNoticia: number, dataNoticia: UpdateNoticiaDto) {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
