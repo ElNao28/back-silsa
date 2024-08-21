@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { NoticiasService } from './noticias.service';
 import { CreateNoticiaDto } from './dto/create-noticia.dto';
 import { UpdateNoticiaDto } from './dto/update-noticia.dto';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('noticias')
 export class NoticiasController {
@@ -29,7 +29,16 @@ export class NoticiasController {
   )
   @Post('create-noticia')
   createNoticia(@Body() createNoticiaDto: CreateNoticiaDto,@UploadedFiles() files: { imagen?: Express.Multer.File[]}) {
-    return this.noticiasService.createNoticia(createNoticiaDto,files);
+    //return this.noticiasService.createNoticia(createNoticiaDto,files);
+  }
+  @Post('create-noticia-test')
+  @UseInterceptors(
+    FilesInterceptor('images')
+  )
+  createNoticiaTest(@Body() data, @UploadedFiles()files:Array<Express.Multer.File>) {
+    let dataNotice:{position:number,type:string, content:string}[] = JSON.parse(data.data);
+    return this.noticiasService.createNewNotice(dataNotice,files)
+    //return this.noticiasService.createNoticia(createNoticiaDto,files);
   }
   @Post('desactivate/:id')
   desactivateNoticia(@Param('id')idNoticia:string){
@@ -41,7 +50,7 @@ export class NoticiasController {
   }
   @Delete('delete/:id')
   deleteNoticia(@Param('id')idNoticia:string){
-    return this.noticiasService.deleteNoticia(parseInt(idNoticia));
+    //return this.noticiasService.deleteNoticia(parseInt(idNoticia));
   }
   @Patch('update-noticia/:id')
   updateNoticia(@Param('id')idNoticia:string,@Body()dataNoticia:UpdateNoticiaDto){
@@ -50,6 +59,6 @@ export class NoticiasController {
   @Patch('update-img/:id')
   @UseInterceptors(FileInterceptor('imagen'))
   editImgNoticia(@Param('id')id:number,@UploadedFile() imagen: Express.Multer.File) {
-    return this.noticiasService.editImgNoticia(id,imagen);
+    //return this.noticiasService.editImgNoticia(id,imagen);
   }
 }

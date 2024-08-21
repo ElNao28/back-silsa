@@ -1,21 +1,17 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { DataNoticia } from "./data-noticias.entity";
 
 @Entity('noticias')
 export class Noticia {
     @PrimaryGeneratedColumn()
     id:number;
     @Column({type:'varchar',nullable:false})
-    titulo:string;
-    @Column({type:'varchar',nullable:false,length:5000})
-    contenido:string;
-    @Column({type:'varchar',nullable:false})
     autor:string;
     @Column({type:'date'})
     fecha:Date;
-    @Column({type:'varchar',nullable:false})
-    img:string;
-    @Column({type:'varchar',nullable:false})
-    video:string;
     @Column({type:'varchar',nullable:false,default:"activo"})
     status:string;
+
+    @OneToMany(()=>DataNoticia, dataNoticia => dataNoticia.noticia)
+    dataNoticias:DataNoticia[]
 }
