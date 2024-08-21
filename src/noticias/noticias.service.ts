@@ -28,8 +28,7 @@ export class NoticiasService {
     @InjectRepository(DataNoticia) private dataNoticiaRepository:Repository<DataNoticia>
   ) { }
 
-  async createNewNotice(dataNotice:{position:number,type:string,content:string}[],files:Array<Express.Multer.File>,fecha:string, idAutor:string){
-
+  async createNewNotice(dataNotice:{position:number,type:string,content:string}[],files:Array<Express.Multer.File>,fecha:string, idAutor:string){   
     const foundAdmin = await this.acountRepository.findOneBy({id:+idAutor})
     const newNotice = this.noticiaRepository.create({
       status:'activo',
@@ -53,11 +52,11 @@ export class NoticiasService {
           if (err) return reject(err);
           resolve(result);
         });
-        toStream(files[0].buffer).pipe(uploadImg);
+        toStream(files[i].buffer).pipe(uploadImg);
       });
       const foundNotice = await this.dataNoticiaRepository.findOne({
         where:{
-          content: files[0].originalname,
+          content: files[i].originalname,
           type:'image',
           noticia:saveNewNotice
         }
