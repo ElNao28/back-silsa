@@ -189,12 +189,12 @@ export class NoticiasService {
       status: HttpStatus.OK
     }
   }
-  async updateNoticia(idNoticia: number, dataNoticia: { id: number, content: string, position: number, type: string, }[],files:Array<Express.Multer.File>) {
+  async updateNoticia(idNoticia: number, dataNoticia: { id: number, content: string, position: number, type: string, }[], files: Array<Express.Multer.File>) {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
         id: idNoticia
       },
-      relations:['dataNoticias']
+      relations: ['dataNoticias']
     });
     if (!foundNoticia) {
       return {
@@ -202,9 +202,9 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
-    for(let i = 0; i < foundNoticia.dataNoticias.length; i++) {
+    for (let i = 0; i < foundNoticia.dataNoticias.length; i++) {
       const isFound = dataNoticia.find(data => data.id === foundNoticia.dataNoticias[i].id)
-      if(!isFound){
+      if (!isFound) {
         this.dataNoticiaRepository.delete(foundNoticia.dataNoticias[i].id)
       }
     }
@@ -212,36 +212,53 @@ export class NoticiasService {
       if (dataNoticia[i].id) {
         const foundDataNotice = await this.dataNoticiaRepository.findOneBy({ id: dataNoticia[i].id })
         if (foundDataNotice) {
-          /* aqui debo de poner la actualizacion de la imagen */
-          await this.dataNoticiaRepository.update(foundDataNotice.id,{
-            content:dataNoticia[i].content
-          })
+          if (foundDataNotice.type === 'image') {
+            const foundDataImage = files.find(data => data.originalname === dataNoticia[i].content);
+            if (foundDataImage) {
+              const idImage = foundDataNotice.content.split('/')[8].split('.')[0];
+              cloudinary.v2.api.delete_resources([`noticias/${idImage}`],{type:'upload',resource_type:'image'}).then();
+              const newPromise = await new Promise<{ secure_url: string }>((resolve, reject) => {
+                const uploadImage = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, res) => {
+                  if (err) return reject(err)
+                  resolve(res)
+                });
+                toStream(foundDataImage.buffer).pipe(uploadImage)
+              });
+              await this.dataNoticiaRepository.update(foundDataNotice.id, {
+                content: newPromise.secure_url
+              });
+            }
+          }
+          else {
+            await this.dataNoticiaRepository.update(foundDataNotice.id, {
+              content: dataNoticia[i].content
+            })
+          }
         }
       }
       else {
         const newComponent = this.dataNoticiaRepository.create({
-          type:dataNoticia[i].type,
-          position:dataNoticia[i].position,
-          content:dataNoticia[i].content,
-          noticia:foundNoticia
+          type: dataNoticia[i].type,
+          position: dataNoticia[i].position,
+          content: dataNoticia[i].content,
+          noticia: foundNoticia
         });
         const newSaveComponet = await this.dataNoticiaRepository.save(newComponent);
-
-        for(let j = 0; j < files.length;j++){
-          const newPromise = await new Promise<{secure_url:string}>((resolve, reject)=>{
-            const uploadImage = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, result)=>{
-              if(err) return reject(err)
+        for (let j = 0; j < files.length; j++) {
+          const newPromise = await new Promise<{ secure_url: string }>((resolve, reject) => {
+            const uploadImage = cloudinary.v2.uploader.upload_stream({ folder: 'noticias' }, (err, result) => {
+              if (err) return reject(err)
               resolve(result)
             });
             toStream(files[j].buffer).pipe(uploadImage)
           });
           const foundDataNotice = await this.dataNoticiaRepository.findOne({
-            where:{
-              id:newSaveComponet.id
+            where: {
+              id: newSaveComponet.id
             }
           });
-          this.dataNoticiaRepository.update(foundDataNotice.id,{
-            content:newPromise.secure_url
+          this.dataNoticiaRepository.update(foundDataNotice.id, {
+            content: newPromise.secure_url
           });
         }
       }
