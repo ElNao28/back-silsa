@@ -25,15 +25,15 @@ export class NoticiasService {
   constructor(
     @InjectRepository(Noticia) private noticiaRepository: Repository<Noticia>,
     @InjectRepository(Acount) private acountRepository: Repository<Acount>,
-    @InjectRepository(DataNoticia) private dataNoticiaRepository:Repository<DataNoticia>
+    @InjectRepository(DataNoticia) private dataNoticiaRepository: Repository<DataNoticia>
   ) { }
 
-  async createNewNotice(dataNotice:{position:number,type:string,content:string}[],files:Array<Express.Multer.File>,fecha:string, idAutor:string){   
-    const foundAdmin = await this.acountRepository.findOneBy({id:+idAutor})
+  async createNewNotice(dataNotice: { position: number, type: string, content: string }[], files: Array<Express.Multer.File>, fecha: string, idAutor: string) {
+    const foundAdmin = await this.acountRepository.findOneBy({ id: +idAutor })
     const newNotice = this.noticiaRepository.create({
-      status:'activo',
-      autor:`${foundAdmin.nombre} ${foundAdmin.apellido} ${foundAdmin.apellidoM}`,
-      fecha:fecha
+      status: 'activo',
+      autor: `${foundAdmin.nombre} ${foundAdmin.apellido} ${foundAdmin.apellidoM}`,
+      fecha: fecha
     });
     const saveNewNotice = await this.noticiaRepository.save(newNotice)
     for (let i = 0; i < dataNotice.length; i++) {
@@ -42,34 +42,34 @@ export class NoticiasService {
         type,
         position,
         content,
-        noticia:saveNewNotice
+        noticia: saveNewNotice
       });
       this.dataNoticiaRepository.save(newData)
     }
-    for(let i = 0; i < files.length; i++){
-      const newPromise = await new Promise<{ secure_url:string }>((resolve, reject) => {
-        const uploadImg = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, result) => {
+    for (let i = 0; i < files.length; i++) {
+      const newPromise = await new Promise<{ secure_url: string }>((resolve, reject) => {
+        const uploadImg = cloudinary.v2.uploader.upload_stream({ folder: 'noticias' }, (err, result) => {
           if (err) return reject(err);
           resolve(result);
         });
         toStream(files[i].buffer).pipe(uploadImg);
       });
       const foundNotice = await this.dataNoticiaRepository.findOne({
-        where:{
+        where: {
           content: files[i].originalname,
-          type:'image',
-          noticia:saveNewNotice
+          type: 'image',
+          noticia: saveNewNotice
         }
       });
-      if(foundNotice){
-        this.dataNoticiaRepository.update(foundNotice.id,{
-          content:newPromise.secure_url
+      if (foundNotice) {
+        this.dataNoticiaRepository.update(foundNotice.id, {
+          content: newPromise.secure_url
         })
       }
     }
-    return{
-      message:'Exito',
-      status:HttpStatus.OK
+    return {
+      message: 'Exito',
+      status: HttpStatus.OK
     }
   }
   async getNoticiasForAdmin() {
@@ -78,7 +78,7 @@ export class NoticiasService {
         order: {
           id: 'DESC'
         },
-        relations:['dataNoticias']
+        relations: ['dataNoticias']
       }
     );
     return {
@@ -115,7 +115,7 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
-    foundNoticia.dataNoticias.sort((a,b)=> a.position - b.position)
+    foundNoticia.dataNoticias.sort((a, b) => a.position - b.position)
     return {
       message: 'Noticia encontrada',
       status: HttpStatus.OK,
@@ -165,35 +165,36 @@ export class NoticiasService {
       where: {
         id: idNoticia
       },
-      relations:['dataNoticias']
+      relations: ['dataNoticias']
     });
     console.log(foundNoticia)
     if (!foundNoticia) {
-      return { 
+      return {
         message: 'Noticia no encontrada',
         status: HttpStatus.NOT_FOUND
       }
     }
-    if(foundNoticia.dataNoticias){
+    if (foundNoticia.dataNoticias) {
       const images = foundNoticia.dataNoticias.filter(data => data.type === 'image')
-      for(let i = 0; i < images.length;i++){
+      for (let i = 0; i < images.length; i++) {
         const idImg = images[i].content.split('/')[8].split('.')[0]
         console.log(idImg)
-        cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
+        cloudinary.v2.api.delete_resources([`noticias/${idImg}`], { type: 'upload', resource_type: 'image' }).then();
       }
     }
-    await this.dataNoticiaRepository.delete({noticia:foundNoticia})
+    await this.dataNoticiaRepository.delete({ noticia: foundNoticia })
     this.noticiaRepository.delete(foundNoticia.id)
     return {
       message: 'Noticia eliminada',
       status: HttpStatus.OK
     }
   }
-  async updateNoticia(idNoticia: number, dataNoticia:{id: number,content:string}[]) {
+  async updateNoticia(idNoticia: number, dataNoticia: { id: number, content: string, position: number, type: string, }[],files:Array<Express.Multer.File>) {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
         id: idNoticia
-      }
+      },
+      relations:['dataNoticias']
     });
     if (!foundNoticia) {
       return {
@@ -201,12 +202,48 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
-    for(let i = 0; i < dataNoticia.length;i++){
-      const foundDataNotice = await this.dataNoticiaRepository.findOneBy({id:dataNoticia[i].id})
-      if(foundDataNotice){
-        await this.dataNoticiaRepository.update(foundDataNotice.id,{
-          content:dataNoticia[i].content
-        })
+    for(let i = 0; i < foundNoticia.dataNoticias.length; i++) {
+      const isFound = dataNoticia.find(data => data.id === foundNoticia.dataNoticias[i].id)
+      if(!isFound){
+        this.dataNoticiaRepository.delete(foundNoticia.dataNoticias[i].id)
+      }
+    }
+    for (let i = 0; i < dataNoticia.length; i++) {
+      if (dataNoticia[i].id) {
+        const foundDataNotice = await this.dataNoticiaRepository.findOneBy({ id: dataNoticia[i].id })
+        if (foundDataNotice) {
+          /* aqui debo de poner la actualizacion de la imagen */
+          await this.dataNoticiaRepository.update(foundDataNotice.id,{
+            content:dataNoticia[i].content
+          })
+        }
+      }
+      else {
+        const newComponent = this.dataNoticiaRepository.create({
+          type:dataNoticia[i].type,
+          position:dataNoticia[i].position,
+          content:dataNoticia[i].content,
+          noticia:foundNoticia
+        });
+        const newSaveComponet = await this.dataNoticiaRepository.save(newComponent);
+
+        for(let j = 0; j < files.length;j++){
+          const newPromise = await new Promise<{secure_url:string}>((resolve, reject)=>{
+            const uploadImage = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, result)=>{
+              if(err) return reject(err)
+              resolve(result)
+            });
+            toStream(files[j].buffer).pipe(uploadImage)
+          });
+          const foundDataNotice = await this.dataNoticiaRepository.findOne({
+            where:{
+              id:newSaveComponet.id
+            }
+          });
+          this.dataNoticiaRepository.update(foundDataNotice.id,{
+            content:newPromise.secure_url
+          });
+        }
       }
     }
     return {
@@ -216,8 +253,8 @@ export class NoticiasService {
   }
   async getTreeNoticie() {
     const noticias = await this.noticiaRepository.find({
-      where:{
-        status:'activo'
+      where: {
+        status: 'activo'
       },
       order: {
         id: 'DESC'
@@ -246,7 +283,7 @@ export class NoticiasService {
   //   }
   //   const idImg = foundNoticia.img.split('/')[8].split('.')[0];
   //   cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
-    
+
   //   const newPromise = await new Promise<{secure_url:string}>((resolve, reject) => {
   //     const newImg = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, result)=>{
   //       if(err) reject(err);

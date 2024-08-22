@@ -27,17 +27,15 @@ export class NoticiasController {
   }
   /**********************************************************************************************************/
   @Post('create-noticia-test')
-  @UseInterceptors(
-    FilesInterceptor('images')
-  )
+  @UseInterceptors(FilesInterceptor('images'))
   createNoticiaTest(@Body() data, @UploadedFiles() files: Array<Express.Multer.File>) {
     let dataNotice: { position: number, type: string, content: string }[] = JSON.parse(data.data);
     return this.noticiasService.createNewNotice(dataNotice, files, data.fecha, data.autor)
   }
   @Patch('update-noticia/:id')
-  @UseInterceptors(FileInterceptor('file'))
-  updateNoticia(@Param('id') idNoticia: string, @UploadedFile() file, @Body() data) {
-    return this.noticiasService.updateNoticia(+idNoticia, JSON.parse(data.data));
+  @UseInterceptors(FilesInterceptor('images'))
+  updateNoticia(@Param('id') idNoticia: string, @UploadedFiles() files:Array<Express.Multer.File>, @Body() data) {
+    return this.noticiasService.updateNoticia(+idNoticia, JSON.parse(data.data),files);
   }
   /**********************************************************************************************************/
   @Post('desactivate/:id')
