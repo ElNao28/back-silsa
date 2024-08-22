@@ -6,11 +6,16 @@ import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestj
 
 @Controller('noticias')
 export class NoticiasController {
-  constructor(private readonly noticiasService: NoticiasService) {}
+  constructor(private readonly noticiasService: NoticiasService) { }
 
+  /**********************************************************************************************************/
   @Get()
   findAll() {
     return this.noticiasService.getNoticiasForAdmin();
+  }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.noticiasService.getNoticiaById(parseInt(id));
   }
   @Get('tree')
   findAl() {
@@ -18,41 +23,39 @@ export class NoticiasController {
   }
   @Get('all')
   getNoticiasForUser() {
-    return this.noticiasService.getNoticiasForUser();
+    //return this.noticiasService.getNoticiasForUser();
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.noticiasService.getNoticiaById(parseInt(id));
-  }
+  /**********************************************************************************************************/
   @Post('create-noticia-test')
   @UseInterceptors(
     FilesInterceptor('images')
   )
-  createNoticiaTest(@Body() data, @UploadedFiles()files:Array<Express.Multer.File>) {
-    let dataNotice:{position:number,type:string, content:string}[] = JSON.parse(data.data);
-    return this.noticiasService.createNewNotice(dataNotice,files,data.fecha,data.autor)
+  createNoticiaTest(@Body() data, @UploadedFiles() files: Array<Express.Multer.File>) {
+    let dataNotice: { position: number, type: string, content: string }[] = JSON.parse(data.data);
+    return this.noticiasService.createNewNotice(dataNotice, files, data.fecha, data.autor)
   }
-
-  
+  @Patch('update-noticia/:id')
+  @UseInterceptors(FileInterceptor('file'))
+  updateNoticia(@Param('id') idNoticia: string, @UploadedFile() file, @Body() data) {
+    return this.noticiasService.updateNoticia(+idNoticia, JSON.parse(data.data));
+  }
+  /**********************************************************************************************************/
   @Post('desactivate/:id')
-  desactivateNoticia(@Param('id')idNoticia:string){
+  desactivateNoticia(@Param('id') idNoticia: string) {
     return this.noticiasService.desactivateNoticia(parseInt(idNoticia));
   }
   @Post('activate/:id')
-  activateNoticia(@Param('id')idNoticia:string){
+  activateNoticia(@Param('id') idNoticia: string) {
     return this.noticiasService.activateNoticia(parseInt(idNoticia));
   }
   @Delete('delete/:id')
-  deleteNoticia(@Param('id')idNoticia:string){
+  deleteNoticia(@Param('id') idNoticia: string) {
     return this.noticiasService.deleteNoticia(parseInt(idNoticia));
   }
-  @Patch('update-noticia/:id')
-  updateNoticia(@Param('id')idNoticia:string,@Body()dataNoticia:UpdateNoticiaDto){
-    return this.noticiasService.updateNoticia(parseInt(idNoticia),dataNoticia);
-  }
+/**********************************************************************************************************/
   @Patch('update-img/:id')
   @UseInterceptors(FileInterceptor('imagen'))
-  editImgNoticia(@Param('id')id:number,@UploadedFile() imagen: Express.Multer.File) {
+  editImgNoticia(@Param('id') id: number, @UploadedFile() imagen: Express.Multer.File) {
     //return this.noticiasService.editImgNoticia(id,imagen);
   }
 }

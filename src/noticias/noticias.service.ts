@@ -87,26 +87,27 @@ export class NoticiasService {
       data: noticias
     }
   }
-  async getNoticiasForUser() {
-    const noticias = await this.noticiaRepository.find({
-      where: {
-        status: 'activo'
-      },
-      order: {
-        id: 'DESC'
-      },
-    });
-    return {
-      message: 'Noticias encontradas',
-      status: HttpStatus.OK,
-      data: noticias
-    }
-  }
+  // async getNoticiasForUser() {
+  //   const noticias = await this.noticiaRepository.find({
+  //     where: {
+  //       status: 'activo'
+  //     },
+  //     order: {
+  //       id: 'DESC'
+  //     },
+  //   });
+  //   return {
+  //     message: 'Noticias encontradas',
+  //     status: HttpStatus.OK,
+  //     data: noticias
+  //   }
+  // }
   async getNoticiaById(id: number) {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
         id: id
-      }
+      },
+      relations: ['dataNoticias'],
     });
     if (!foundNoticia) {
       return {
@@ -114,6 +115,7 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
+    foundNoticia.dataNoticias.sort((a,b)=> a.position - b.position)
     return {
       message: 'Noticia encontrada',
       status: HttpStatus.OK,
@@ -187,7 +189,7 @@ export class NoticiasService {
       status: HttpStatus.OK
     }
   }
-  async updateNoticia(idNoticia: number, dataNoticia: UpdateNoticiaDto) {
+  async updateNoticia(idNoticia: number, dataNoticia:{id: number,content:string}[]) {
     const foundNoticia = await this.noticiaRepository.findOne({
       where: {
         id: idNoticia
@@ -199,7 +201,14 @@ export class NoticiasService {
         status: HttpStatus.NOT_FOUND
       }
     }
-    this.noticiaRepository.update(idNoticia, dataNoticia);
+    for(let i = 0; i < dataNoticia.length;i++){
+      const foundDataNotice = await this.dataNoticiaRepository.findOneBy({id:dataNoticia[i].id})
+      if(foundDataNotice){
+        await this.dataNoticiaRepository.update(foundDataNotice.id,{
+          content:dataNoticia[i].content
+        })
+      }
+    }
     return {
       message: 'Noticia actualizada',
       status: HttpStatus.OK
