@@ -7,7 +7,7 @@ export class DataNoticia{
     id:number;
     @Column()
     type:string;
-    @Column()
+    @Column({type:'text'})
     content:string;
     @Column()
     position:number;
