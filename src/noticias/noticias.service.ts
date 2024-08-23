@@ -276,6 +276,7 @@ export class NoticiasService {
       order: {
         id: 'DESC'
       },
+      relations:['dataNoticias'],
       take: 3
     });
 
@@ -285,35 +286,22 @@ export class NoticiasService {
       data: noticias
     };
   }
+  async getNoticiasForUser(){
+    const noticias = await this.noticiaRepository.find({
+      where: {
+        status: 'activo'
+      },
+      order: {
+        id: 'DESC'
+      },
+      relations:['dataNoticias']
+    });
+    return {
+      message: 'Noticias encontradas',
+      status: HttpStatus.OK,
+      data: noticias
+    };
+    
+  }
 
-  // async editImgNoticia(id:number, imagen:Express.Multer.File){
-  //   const foundNoticia = await this.noticiaRepository.findOne({
-  //     where: {
-  //       id: id
-  //     }
-  //   });
-  //   if (!foundNoticia) {
-  //     return {
-  //       message: 'Noticia no encontrada',
-  //       status: HttpStatus.NOT_FOUND
-  //     }
-  //   }
-  //   const idImg = foundNoticia.img.split('/')[8].split('.')[0];
-  //   cloudinary.v2.api.delete_resources([`noticias/${idImg}`],{type:'upload',resource_type:'image'}).then();
-
-  //   const newPromise = await new Promise<{secure_url:string}>((resolve, reject) => {
-  //     const newImg = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, result)=>{
-  //       if(err) reject(err);
-  //       resolve(result);
-  //     });
-  //     toStream(imagen.buffer).pipe(newImg)
-  //   })
-  //   this.noticiaRepository.update(id,{
-  //     img: newPromise.secure_url
-  //   });
-  //   return {
-  //     message: 'Imagen actualizada',
-  //     status: HttpStatus.OK
-  //   }
-  // }
 }

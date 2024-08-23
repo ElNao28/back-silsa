@@ -13,17 +13,17 @@ export class NoticiasController {
   findAll() {
     return this.noticiasService.getNoticiasForAdmin();
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.noticiasService.getNoticiaById(parseInt(id));
-  }
   @Get('tree')
   findAl() {
     return this.noticiasService.getTreeNoticie();
   }
   @Get('all')
   getNoticiasForUser() {
-    //return this.noticiasService.getNoticiasForUser();
+    return this.noticiasService.getNoticiasForUser();
+  }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.noticiasService.getNoticiaById(parseInt(id));
   }
   /**********************************************************************************************************/
   @Post('create-noticia-test')
