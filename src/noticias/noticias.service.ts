@@ -216,9 +216,9 @@ export class NoticiasService {
             const foundDataImage = files.find(data => data.originalname === dataNoticia[i].content);
             if (foundDataImage) {
               const idImage = foundDataNotice.content.split('/')[8].split('.')[0];
-              cloudinary.v2.api.delete_resources([`noticias/${idImage}`],{type:'upload',resource_type:'image'}).then();
+              cloudinary.v2.api.delete_resources([`noticias/${idImage}`], { type: 'upload', resource_type: 'image' }).then();
               const newPromise = await new Promise<{ secure_url: string }>((resolve, reject) => {
-                const uploadImage = cloudinary.v2.uploader.upload_stream({folder:'noticias'},(err, res) => {
+                const uploadImage = cloudinary.v2.uploader.upload_stream({ folder: 'noticias' }, (err, res) => {
                   if (err) return reject(err)
                   resolve(res)
                 });
@@ -243,7 +243,7 @@ export class NoticiasService {
           content: dataNoticia[i].content,
           noticia: foundNoticia
         });
-        const newSaveComponet = await this.dataNoticiaRepository.save(newComponent);
+        await this.dataNoticiaRepository.save(newComponent);
         for (let j = 0; j < files.length; j++) {
           const newPromise = await new Promise<{ secure_url: string }>((resolve, reject) => {
             const uploadImage = cloudinary.v2.uploader.upload_stream({ folder: 'noticias' }, (err, result) => {
@@ -254,12 +254,17 @@ export class NoticiasService {
           });
           const foundDataNotice = await this.dataNoticiaRepository.findOne({
             where: {
-              id: newSaveComponet.id
+              content: files[j].originalname,
+              type: 'image',
+              noticia: foundNoticia
             }
           });
-          this.dataNoticiaRepository.update(foundDataNotice.id, {
-            content: newPromise.secure_url
-          });
+          if (foundDataNotice) {
+            this.dataNoticiaRepository.update(foundDataNotice.id, {
+              content: newPromise.secure_url
+            });
+          }
+
         }
       }
     }
@@ -276,7 +281,7 @@ export class NoticiasService {
       order: {
         id: 'DESC'
       },
-      relations:['dataNoticias'],
+      relations: ['dataNoticias'],
       take: 3
     });
 
@@ -286,7 +291,7 @@ export class NoticiasService {
       data: noticias
     };
   }
-  async getNoticiasForUser(){
+  async getNoticiasForUser() {
     const noticias = await this.noticiaRepository.find({
       where: {
         status: 'activo'
@@ -294,14 +299,14 @@ export class NoticiasService {
       order: {
         id: 'DESC'
       },
-      relations:['dataNoticias']
+      relations: ['dataNoticias']
     });
     return {
       message: 'Noticias encontradas',
       status: HttpStatus.OK,
       data: noticias
     };
-    
+
   }
 
 }
