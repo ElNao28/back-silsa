@@ -58,7 +58,7 @@ export class SendEmailService {
                     este mensaje o ponerte en contacto con nostros al contacto:</p> <span
                     style="color: rgb(2, 2, 207);">silsaconsultores88@gmail.com</span>
             </div>
-        </div>
+        </div> 
     </section>`
     });
     console.log("Message sent: %s", info.messageId);
